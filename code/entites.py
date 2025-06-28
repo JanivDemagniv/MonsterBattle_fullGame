@@ -9,6 +9,7 @@ class Entitie(pygame.sprite.Sprite):
         #sprite setup
         self.image = self.frames[initial_state][self.frame_index]
         self.rect = self.image.get_frect(center = pos)
+        self.hitbox = self.rect.inflate(-self.rect.width / 2, -60)
 
         #movement
         self.direction = vector(100,100)
@@ -34,8 +35,9 @@ class Entitie(pygame.sprite.Sprite):
 
 
 class Player(Entitie):
-    def __init__(self, pos,frames, initial_state , groups):
+    def __init__(self, pos,frames, initial_state , groups, collision_sprites):
         super().__init__(pos, frames, initial_state, groups)
+        self.collisions_spirtes = collision_sprites
 
     def input(self):
         keys = pygame.key.get_pressed()
@@ -58,7 +60,30 @@ class Player(Entitie):
         self.direction = input_vector
 
     def move(self, dt):
-        self.rect.center += self.direction * self.speed * dt
+        self.rect.centerx += self.direction.x * self.speed * dt
+        self.hitbox.centerx = self.rect.centerx
+        self.collisions('horizontal')
+        self.rect.centery += self.direction.y * self.speed * dt
+        self.hitbox.centery = self.rect.centery
+        self.collisions('vertical')
+
+    def collisions(self,axis):
+        for sprite in self.collisions_spirtes:
+            if sprite.hitbox.colliderect(self.hitbox):
+                if axis == 'horizontal':
+                    if self.direction.x > 0:
+                        self.hitbox.right = sprite.hitbox.left
+                    if self.direction.x < 0:
+                        self.hitbox.left = sprite.hitbox.right
+                    self.rect.centerx = self.hitbox.centerx
+                else:
+                    if self.direction.y < 0:
+                        self.hitbox.top = sprite.hitbox.bottom
+                    elif self.direction.y > 0:
+                        self.hitbox.bottom = sprite.hitbox.top
+                    self.rect.centery = self.hitbox.centery
+
+
 
     def update(self, dt):
         self.y_sort = self.rect.centery

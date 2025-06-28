@@ -15,7 +15,9 @@ class Game:
 
         #groups
         self.all_sprites = AllSprites()
+        self.collision_sprites = pygame.sprite.Group()
 
+        #game setups
         self.impot_assest()
         self.setup(self.tmx_map['world'], 'house')
 
@@ -59,7 +61,11 @@ class Game:
             if obj.name == 'top':
                 Sprite((obj.x,obj.y), obj.image, self.all_sprites, WORLD_LAYERS['top'])
             else:
-                Sprite((obj.x,obj.y), obj.image, self.all_sprites)
+                CollideSprites((obj.x,obj.y), obj.image, (self.all_sprites, self.collision_sprites))
+
+        #collision Objects
+        for obj in tmx_map.get_layer_by_name('Collisions'):
+            BorderSprite((obj.x,obj.y), pygame.Surface((obj.width,obj.height)),self.collision_sprites)        
 
         #Monsters
         for obj in tmx_map.get_layer_by_name('Monsters'):
@@ -72,7 +78,8 @@ class Game:
                     pos = (obj.x,obj.y),
                     frames = self.overworld_frames['characters']['player'],
                     initial_state = obj.properties['direction'],
-                    groups = self.all_sprites)
+                    groups = self.all_sprites,
+                    collision_sprites = self.collision_sprites)
             if obj.name == 'Character':
                 graphic = obj.properties['graphic']
                 init_state = obj.properties['direction']
@@ -80,7 +87,7 @@ class Game:
                     pos = (obj.x,obj.y),
                     frames = self.overworld_frames['characters'][graphic],
                     init_state= init_state,
-                    groups = self.all_sprites)
+                    groups = (self.all_sprites, self.collision_sprites))
 
     def run(self):
         while True:
