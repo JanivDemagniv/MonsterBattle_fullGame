@@ -3,6 +3,7 @@ from setting import *
 class Entitie(pygame.sprite.Sprite):
     def __init__(self, pos, frames, initial_state, groups):
         super().__init__(groups)
+        self.z = WORLD_LAYERS['main']
         self.frames , self.frame_index = frames , 0
 
         #sprite setup
@@ -13,6 +14,8 @@ class Entitie(pygame.sprite.Sprite):
         self.direction = vector(100,100)
         self.speed = 250
         self.facing_direction = 'down'
+
+        self.y_sort = self.rect.centery
 
     def animate(self, dt):
         self.frame_index += ANIMATION_SPEED * dt
@@ -58,6 +61,7 @@ class Player(Entitie):
         self.rect.center += self.direction * self.speed * dt
 
     def update(self, dt):
+        self.y_sort = self.rect.centery
         self.input()
         self.move(dt)
         self.animate(dt)
